@@ -10,16 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BillRouteImport } from './routes/bill'
 import { Route as DailyRouteImport } from './routes/daily'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as ProductsRouteImport } from './routes/products'
-import { Route as RemindersRouteImport } from './routes/reminders'
 import { Route as SettingsRouteImport } from './routes/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillRoute = BillRouteImport.update({
+  id: '/bill',
+  path: '/bill',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DailyRoute = DailyRouteImport.update({
@@ -42,11 +47,6 @@ const ProductsRoute = ProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RemindersRoute = RemindersRouteImport.update({
-  id: '/reminders',
-  path: '/reminders',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -55,69 +55,69 @@ const SettingsRoute = SettingsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
-  '/reminders': typeof RemindersRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
-  '/reminders': typeof RemindersRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
-  '/reminders': typeof RemindersRoute
   '/settings': typeof SettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bill'
     | '/daily'
     | '/inventory'
     | '/ledger'
     | '/products'
-    | '/reminders'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bill'
     | '/daily'
     | '/inventory'
     | '/ledger'
     | '/products'
-    | '/reminders'
     | '/settings'
   id:
     | '__root__'
     | '/'
+    | '/bill'
     | '/daily'
     | '/inventory'
     | '/ledger'
     | '/products'
-    | '/reminders'
     | '/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BillRoute: typeof BillRoute
   DailyRoute: typeof DailyRoute
   InventoryRoute: typeof InventoryRoute
   LedgerRoute: typeof LedgerRoute
   ProductsRoute: typeof ProductsRoute
-  RemindersRoute: typeof RemindersRoute
   SettingsRoute: typeof SettingsRoute
 }
 
@@ -128,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bill': {
+      id: '/bill'
+      path: '/bill'
+      fullPath: '/bill'
+      preLoaderRoute: typeof BillRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/daily': {
@@ -158,13 +165,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reminders': {
-      id: '/reminders'
-      path: '/reminders'
-      fullPath: '/reminders'
-      preLoaderRoute: typeof RemindersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -177,11 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BillRoute: BillRoute,
   DailyRoute: DailyRoute,
   InventoryRoute: InventoryRoute,
   LedgerRoute: LedgerRoute,
   ProductsRoute: ProductsRoute,
-  RemindersRoute: RemindersRoute,
   SettingsRoute: SettingsRoute,
 }
 export const routeTree = rootRouteImport

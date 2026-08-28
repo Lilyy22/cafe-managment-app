@@ -53,34 +53,14 @@ function InventoryPage() {
         </Button>
       }
     >
-      <div>
        <InventoryForm 
         open={open} 
         setOpen={setOpen}
         initialData={editingItem} 
       />
-        <div className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Input
-              placeholder="Search items…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="sm:max-w-xs"
-            />
-            <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="recipe">Recipe</TabsTrigger>
-                <TabsTrigger value="manual">Consumables</TabsTrigger>
-                <TabsTrigger value="low">Low</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          <InventoryList 
-            onEdit={handleEdit}
-          />
-        </div>
-      </div>
+      <InventoryList 
+        onEdit={handleEdit}
+      />
     </AppShell>
   );
 }

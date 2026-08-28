@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useShop } from "@/lib/shop-store";
+import { useInventories } from "@/hooks/useInventories";
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -25,7 +26,7 @@ const nav = [
   { to: "/ledger", label: "Sales & expenses", icon: Receipt },
   { to: "/inventory", label: "Inventory", icon: Package },
   { to: "/products", label: "Products & prices", icon: Tags },
-  { to: "/reminders", label: "Bills", icon: BellRing },
+  { to: "/bill", label: "Bills", icon: BellRing },
   { to: "/settings", label: "Settings", icon: Settings }, // Restored
 ] as const;
 
@@ -118,6 +119,11 @@ export function AppShell({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { data: inventories } = useInventories(); 
+  const LOW_STOCK_THRESHOLD = 5; 
+  const lowStockItems = inventories?.filter(
+    (item) => item.remaining <= LOW_STOCK_THRESHOLD
+  ) || [];
 
   useEffect(() => {
     setMobileOpen(false);
@@ -136,7 +142,7 @@ export function AppShell({
       >
         <Brand collapsed={collapsed} />
         <div className="flex-1 overflow-y-auto pb-4">
-          <NavList collapsed={collapsed} lowCount={low.length} />
+          <NavList collapsed={collapsed} lowCount={lowStockItems.length} />
         </div>
         <div className="border-t border-border/70 p-2">
           <Button
@@ -187,7 +193,7 @@ export function AppShell({
         </header>
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-5 pb-24 sm:px-4 sm:py-6 md:pb-8">
-          {settings?.showLowStockBanner && low.length > 0 ? (
+          {lowStockItems.length > 0 ? (
             <Link
               to="/inventory"
               className="mb-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm"
@@ -195,10 +201,10 @@ export function AppShell({
               <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" />
               <span className="min-w-0">
                 <span className="font-semibold text-foreground">
-                  {low.length} item{low.length > 1 ? "s" : ""} low on stock
+                  {lowStockItems.length} item{lowStockItems.length > 1 ? "s" : ""} low on stock
                 </span>{" "}
                 <span className="text-muted-foreground">
-                  — {low.map((m) => m.name).join(", ")}. Tap to restock.
+                  — {lowStockItems.map((m) => m.name).join(", ")}. Tap to restock.
                 </span>
               </span>
             </Link>

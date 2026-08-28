@@ -40,7 +40,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Dashboard() {
-  const { entries, expenses, products, materialStats, reminders } = useShop();
+  const { entries, expenses, products, materialStats } = useShop();
   const today = isoDate(new Date());
 
   const todayEntry = entries.find((e) => e.date === today) ?? entries[0];
@@ -74,10 +74,7 @@ function Dashboard() {
   }, [entries, products]);
 
   const lowStock = materialStats.filter((m) => m.low);
-  const dueReminders = [...reminders]
-    .filter((r) => !r.paid)
-    .sort((a, b) => (a.dueDate < b.dueDate ? -1 : 1));
-
+ 
   return (
     <AppShell
       title="Dashboard"
@@ -236,38 +233,13 @@ function Dashboard() {
               <CardDescription>Rent, salary and light bill</CardDescription>
             </div>
             <Link
-              to="/reminders"
+              to="/bills"
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               All bills
             </Link>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {dueReminders.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Everything is paid. Nice.</p>
-            ) : (
-              dueReminders.map((r) => {
-                const overdue = r.dueDate < today;
-                return (
-                  <div
-                    key={r.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-secondary/40 px-3 py-2"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{r.title}</p>
-                      <p className="text-xs text-muted-foreground">Due {r.dueDate}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-semibold text-foreground">{formatETB(r.amount)}</p>
-                      <Badge variant={overdue ? "destructive" : "secondary"}>
-                        {overdue ? "Overdue" : "Upcoming"}
-                      </Badge>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </CardContent>
+         
         </Card>
       </div>
     </AppShell>
