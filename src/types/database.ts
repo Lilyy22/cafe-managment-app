@@ -38,6 +38,46 @@ export interface Database {
             created_at?: string; updated_at?: string; 
           };
         };
+        bills: {
+          Row: {
+            id: string;
+            vendor_name: string;
+            description: string | null;
+            category: string | null;
+            amount: number;
+            due_date: string;               // e.g., "2023-10-31"
+            status: string;                 // e.g., "unpaid", "paid", "overdue"
+            expense_id: string | null;
+            paid_at: string | null;         // ✅ e.g., "2023-10-30T14:30:00.000Z" (Includes time!)
+            created_at: string;
+            updated_at: string;
+          };
+          Insert: {
+            id?: string;
+            vendor_name: string;
+            description?: string | null;
+            category?: string | null;
+            amount: number;
+            due_date: string;
+            status?: string;
+            expense_id?: string | null;
+            paid_at?: string | null;        // ✅ Optional, defaults to null
+            created_at?: string;
+            updated_at?: string;
+          };
+          Update: {
+            id?: string;
+            vendor_name?: string;
+            description?: string | null;
+            category?: string | null;
+            amount?: number;
+            due_date?: string;
+            status?: string;
+            expense_id?: string | null;
+            paid_at?: string | null;        // ✅ Optional, set to ISO string when paid
+            updated_at?: string;
+          };
+        }
         // ... add the rest of your tables (expenses, products, sales) following this pattern
       };
     };
@@ -115,4 +155,21 @@ export interface Sale {
     
     // Optional joins
     product_details?: Product;
+}
+
+export interface Bill {
+  id: string;
+  vendor_name: string;              // Usually required, so removed '?'
+  description: string | null;       // Made nullable to match DB schema
+  amount: number;                   // 💡 This is the monetary cost (not quantity)
+  due_date: string;                 // e.g., "2023-10-31"
+  category: string | null;
+  status?: 'unpaid' | 'paid' | 'overdue' | null; // 💡 Union type for better autocomplete!
+  paid_at: string | null;           // ✅ Perfect: Holds ISO time string or null
+  expense_id: string | null;        // UUID reference to expense.id
+  created_at: string;
+  updated_at: string | null;
+  
+  // Optional joins (if you do a Supabase select with nested relations)
+  expense_details?: Expense | null;
 }

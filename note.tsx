@@ -229,7 +229,7 @@ export function SalesForm({ initialData, open, setOpen }: SalesFormProps) {
     }
 
     if (creates.length === 0 && updates.length === 0 && deletes.length === 0) {
-      toast("No changes to save.")
+      toast.info("No changes to save.")
       return
     }
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { billService } from '../services/billService'
 import { toast } from 'sonner'
 import type { Bill } from '@/types/database'
+import { expenseService } from '@/services/expenseService'
 
 export function useBills() {
   return useQuery({
@@ -17,11 +18,11 @@ export function useCreateBill() {
     mutationFn: billService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills'] })
-      toast('Bill added successfully!')
+      toast.success('Bill added successfully!')
     },
     onError: (error: Error) => {
       console.error('Failed to add bill:', error)
-      toast('Failed to add bill. Check console for details.')
+      toast.error('Failed to add bill. Check console for details.')
     }
   })
 }
@@ -39,11 +40,11 @@ export function useUpdateBill() {
     }) => billService.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills'] })
-      toast('Bill updated successfully!')
+      toast.success('Bill updated successfully!')
     },
     onError: (error: Error) => {
       console.error('Failed to update bill:', error)
-      toast('Failed to update bill. Check console for details.')
+      toast.error('Failed to update bill. Check console for details.')
     },
   })
 }
@@ -55,11 +56,11 @@ export function useDeleteBill() {
     mutationFn: billService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bills'] })
-      toast('Bill deleted successfully!')
+      toast.success('Bill deleted successfully!')
     },
     onError: (error: Error) => {
       console.error('Failed to delete bill:', error)
-      toast(`Failed to delete bill: ${error.message}`)
+      toast.error(`Failed to delete bill: ${error.message}`)
     }
   })
 }
@@ -69,17 +70,27 @@ export function useMarkBillAsPaid() {
   const queryClient = useQueryClient()
   
   return useMutation({
-    mutationFn: ({ id, expenseId }: { id: string; expenseId: string }) => 
-      billService.markAsPaid(id, expenseId),
+    mutationFn: async ({ bill, note }: { bill: Bill; note?: string }) => {
+      // 1. Automatically create the expense record
+      const newExpense = await expenseService.create({
+        expense_category: 'bill',
+        date: new Date().toISOString().split('T')[0], // Today's date
+        amount: bill.amount,
+        duration: 'other',
+        note: note || `Paid bill to ${bill.vendor_name}`
+      })
+       // 2. Update the bill to link it to the new expense and mark as paid
+       return await billService.markAsPaid(bill.id, newExpense.id)
+    },
     onSuccess: () => {
       // Invalidate both bills and expenses since they are now linked
       queryClient.invalidateQueries({ queryKey: ['bills'] })
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
-      toast('Bill marked as paid!')
+      toast.success('Bill marked as paid!')
     },
     onError: (error: Error) => {
       console.error('Failed to mark bill as paid:', error)
-      toast(`Failed to mark as paid: ${error.message}`)
+      toast.error(`Failed to mark as paid: ${error.message}`)
     }
   })
 }

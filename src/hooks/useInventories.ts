@@ -26,11 +26,11 @@ export function useCreateInventory() {
     mutationFn: inventoryService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] })
-      toast('Inventory item added successfully!')
+      toast.success('Inventory item added successfully!')
     },
     onError: (error) => {
       console.error('Failed to add inventory:', error)
-      toast('Failed to add inventory. Check console for details.')
+      toast.error('Failed to add inventory. Check console for details.')
     }
   })
 }
@@ -50,10 +50,11 @@ export function useUpdateInventory() {
     }) => inventoryService.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] })
+      toast.success(`Inventory Updated.`)
     },
     onError: (error) => {
       console.error('Failed to update inventory:', error)
-      toast('Failed to update inventory. Check console for details.')
+      toast.error('Failed to update inventory. Check console for details.')
     },
   })
 }
@@ -64,8 +65,8 @@ export function useDeleteInventory() {
       mutationFn: inventoryService.delete,
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['inventories'] })
-        toast('Inventory item deleted!')
+        toast.success('Inventory item deleted!')
       },
-      onError: (error) => toast(`Failed to delete: ${error.message}`)
+      onError: (error) => toast.error(`Failed to delete: ${error.message}`)
     })
   }

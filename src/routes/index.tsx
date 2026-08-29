@@ -233,7 +233,7 @@ function Dashboard() {
               <CardDescription>Rent, salary and light bill</CardDescription>
             </div>
             <Link
-              to="/bills"
+              to="/bill"
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               All bills

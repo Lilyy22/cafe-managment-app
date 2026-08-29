@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "../components/app-shell";
-import { Input } from "../components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { InventoryForm } from "@/components/inventory/inventoryForm";
 import { InventoryList } from "@/components/inventory/inventoryList";
 import { Plus } from "lucide-react";
@@ -28,8 +26,6 @@ export const Route = createFileRoute("/inventory")({
 });
 
 function InventoryPage() {
-  const [search, setSearch] = useState("");
-  const [tab, setTab] = useState<"all" | "recipe" | "manual" | "low">("all");
   const [open, setOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
 

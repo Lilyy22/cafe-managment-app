@@ -115,7 +115,7 @@ export function AppShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
-  const { materialStats, settings } = useShop();
+  const { materialStats } = useShop();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -204,7 +204,7 @@ export function AppShell({
                   {lowStockItems.length} item{lowStockItems.length > 1 ? "s" : ""} low on stock
                 </span>{" "}
                 <span className="text-muted-foreground">
-                  — {lowStockItems.map((m) => m.name).join(", ")}. Tap to restock.
+                  — {lowStockItems.map((m) => m.item).join(", ")}. Tap to restock.
                 </span>
               </span>
             </Link>

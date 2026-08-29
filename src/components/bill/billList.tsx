@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { FileText, Pencil, CheckCircle2, Trash2, AlertCircle } from "lucide-react"
+import { FileText, Pencil, CheckCircle2, Trash2, AlertCircle, EllipsisVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -17,9 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { useBills, useDeleteBill } from "@/hooks/useBills"
+import { useBills, useDeleteBill, useMarkBillAsPaid } from "@/hooks/useBills"
 import { BillForm } from "./billForm"
 import type { Bill } from "@/types/database"
+import { ConfirmDialog } from "../ConfirmDialog"
 
 interface BillListProps {
   onBillPaid?: (bill: Bill, expenseId: string) => void
@@ -32,7 +33,18 @@ export function BillList({ onBillPaid }: BillListProps) {
 
   const { data: bills, isLoading } = useBills()
   const deleteBill = useDeleteBill()
+  const markAsPaid = useMarkBillAsPaid()
+  const [payingBill, setPayingBill] = useState<Bill | null>(null)
 
+  const handleConfirmPayment = () => {
+    if (!payingBill) return
+    markAsPaid.mutate(
+      { bill: payingBill, note: `Paid bill to ${payingBill.vendor_name}` },
+      { onSuccess: () => setPayingBill(null) }
+    )
+  }
+
+  
   // Calculate if a bill is overdue
   const isOverdue = (bill: Bill) => {
     if (bill.status === "paid") return false
@@ -166,7 +178,7 @@ export function BillList({ onBillPaid }: BillListProps) {
               <TableHead>Due Date</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -221,10 +233,10 @@ export function BillList({ onBillPaid }: BillListProps) {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
-                            Actions
+                            <EllipsisVertical />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent className="w-auto p-3 space-y-2" align="end">
                           <DropdownMenuItem
                             onClick={() => {
                               setEditingBill(bill)
@@ -237,7 +249,7 @@ export function BillList({ onBillPaid }: BillListProps) {
                           
                           {bill.status !== "paid" && (
                             <DropdownMenuItem
-                              onClick={() => handleMarkAsPaid(bill)}
+                              onClick={() => setPayingBill(bill)}
                               className="text-green-600"
                             >
                               <CheckCircle2 className="size-4 mr-2" />
@@ -271,6 +283,22 @@ export function BillList({ onBillPaid }: BillListProps) {
         open={isFormOpen}
         setOpen={setIsFormOpen}
       />
-    </div>
+
+    <ConfirmDialog
+    open={!!payingBill}
+    onOpenChange={(isOpen) => !isOpen && setPayingBill(null)}
+    title="Mark this bill as paid?"
+    description={
+      <>
+        This will record an expense of <span className="font-semibold text-foreground">{payingBill?.amount.toFixed(2)} ETB</span> for <span className="font-semibold text-foreground">{payingBill?.vendor_name}</span>.
+      </>
+    }
+    confirmText="Confirm Payment"
+    variant="success" // 👈 Makes the button green
+    isPending={markAsPaid.isPending}
+    onConfirm={handleConfirmPayment}
+    />
+
+  </div>
   )
 }

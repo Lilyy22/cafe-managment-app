@@ -17,11 +17,11 @@ export function useCreateProduct() {
     mutationFn: productService.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast('Product created successfully!')
+      toast.success('Product created successfully!')
     },
     onError: (error) => {
       console.error('Failed to create product:', error)
-      toast('Failed to create product. Check console for details.')
+      toast.error('Failed to create product. Check console for details.')
     }
   })
 }
@@ -34,11 +34,11 @@ export function useUpdateProduct() {
       productService.update(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast('Product updated successfully!')
+      toast.success('Product updated successfully!')
     },
     onError: (error) => {
       console.error('Failed to update product:', error)
-      toast('Failed to update product. Check console for details.')
+      toast.error('Failed to update product. Check console for details.')
     }
   })
 }
@@ -49,8 +49,8 @@ export function useDeleteProduct() {
     mutationFn: productService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast('Product deleted!')
+      toast.success('Product deleted!')
     },
-    onError: (error) => toast(`Failed to delete: ${error.message}`)
+    onError: (error) => toast.error(`Failed to delete: ${error.message}`)
   })
 }

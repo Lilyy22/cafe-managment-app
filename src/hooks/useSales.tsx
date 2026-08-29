@@ -47,7 +47,7 @@ export function useUpdateSale() {
     },
     onError: (error) => {
       console.error('Failed to update sale:', error)
-      toast('Failed to update sale. Check console for details.')
+      toast.error('Failed to update sale. Check console for details.')
     },
   })
 }
@@ -62,7 +62,7 @@ export function useDeleteSale() {
     },
     onError: (error) => {
       console.error('Failed to delete sale:', error)
-      toast('Failed to delete sale. Check console for details.')
+      toast.error('Failed to delete sale. Check console for details.')
     },
   })
 }

@@ -38,10 +38,11 @@ export function useCreateExpense() {
     onSuccess: () => {
       // Refresh the expenses list automatically
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      toast.success(`Expense created.`)
     },
     onError: (error) => {
       console.error('Failed to create expense:', error)
-      toast(`Failed to record expense: ${error.message}`)
+      toast.error(`Failed to record expense: ${error.message}`)
     }
   })
 }
@@ -55,10 +56,11 @@ export function useDeleteExpense() {
     onSuccess: () => {
       // Refresh the expenses list automatically
       queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      toast.success(`Expense deleted.`)
     },
     onError: (error) => {
       console.error('Failed to delete expense:', error)
-      toast(`Failed to delete expense: ${error.message}`)
+      toast.error(`Failed to delete expense: ${error.message}`)
     }
   })
 }
