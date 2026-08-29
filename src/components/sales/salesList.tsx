@@ -8,6 +8,7 @@ import { Label } from '../ui/label'
 import { Trash2, CalendarDays } from 'lucide-react'
 import { useProducts } from '@/hooks/useProducts'
 import { useSalesByDateRange, useDeleteSale } from '@/hooks/useSales'
+import { SkeletonTable } from '../SkeletonLoader'
 
 function formatETB(amount: number): string {
   return `${amount.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`
@@ -56,7 +57,7 @@ export function SalesList() {
   }, [rawSales, products])
 
   if (productsLoading || salesLoading) {
-    return <p className="text-muted-foreground">Loading sales data...</p>
+    return <SkeletonTable />
   }
 
   return (

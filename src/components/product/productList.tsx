@@ -11,6 +11,7 @@ import { Badge } from '../ui/badge'
 import { useProducts } from '@/hooks/useProducts'
 import { Pencil } from 'lucide-react'
 import { Button } from '../ui/button'
+import { SkeletonTable } from '../SkeletonLoader'
 
 // Helper to format ETB currency
 function formatETB(amount: number): string {
@@ -25,11 +26,7 @@ export function ProductList({ onEdit }: ProductListProps) {
   const { data: products, isLoading } = useProducts()
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading products...</p>
-      </div>
-    )
+    return <SkeletonTable />
   }
 
   if (!products || products.length === 0) {

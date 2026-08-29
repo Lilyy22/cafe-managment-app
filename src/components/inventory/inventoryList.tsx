@@ -10,6 +10,7 @@ import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
 import { Pencil, AlertTriangle } from 'lucide-react'
 import { useInventories } from '@/hooks/useInventories'
+import { SkeletonTable } from '../SkeletonLoader'
 
 interface InventoryListProps {
   onEdit: (item: any) => void
@@ -24,7 +25,7 @@ export function InventoryList({ onEdit }: InventoryListProps) {
   const { data: inventories, isLoading } = useInventories()
 
   if (isLoading) {
-    return <p className="text-muted-foreground">Loading inventory...</p>
+    return <SkeletonTable />
   }
 
   if (!inventories || inventories.length === 0) {

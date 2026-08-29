@@ -18,23 +18,35 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { useBills, useDeleteBill, useMarkBillAsPaid } from "@/hooks/useBills"
-import { BillForm } from "./billForm"
 import type { Bill } from "@/types/database"
 import { ConfirmDialog } from "../ConfirmDialog"
+import { SkeletonTable } from "../SkeletonLoader"
 
-interface BillListProps {
-  onBillPaid?: (bill: Bill, expenseId: string) => void
+interface BillListProps{
+  onEdit: (item: any) => void
 }
 
-export function BillList({ onBillPaid }: BillListProps) {
-  const [editingBill, setEditingBill] = useState<Bill | undefined>(undefined)
-  const [isFormOpen, setIsFormOpen] = useState(false)
+export function BillList({ onEdit }: BillListProps) {
   const [filter, setFilter] = useState<"all" | "unpaid" | "overdue" | "paid">("all")
 
   const { data: bills, isLoading } = useBills()
   const deleteBill = useDeleteBill()
   const markAsPaid = useMarkBillAsPaid()
+
   const [payingBill, setPayingBill] = useState<Bill | null>(null)
+  const [deletingBillId, setDeletingBillId] = useState<string | null>(null)
+
+  const handleDelete = (id: string) => {
+    setDeletingBillId(id)
+  }
+
+  // 👇 Add the actual delete confirmation handler
+  const handleConfirmDelete = () => {
+    if (!deletingBillId) return
+    deleteBill.mutate(deletingBillId, {
+      onSuccess: () => setDeletingBillId(null)
+    })
+  }
 
   const handleConfirmPayment = () => {
     if (!payingBill) return
@@ -43,7 +55,6 @@ export function BillList({ onBillPaid }: BillListProps) {
       { onSuccess: () => setPayingBill(null) }
     )
   }
-
   
   // Calculate if a bill is overdue
   const isOverdue = (bill: Bill) => {
@@ -89,28 +100,8 @@ export function BillList({ onBillPaid }: BillListProps) {
     )
   }
 
-  const handleMarkAsPaid = (bill: Bill) => {
-    // This would typically open a "Pay Bill" dialog
-    // For now, we'll just log it - you can implement the full flow
-    console.log("Mark bill as paid:", bill)
-    // You would:
-    // 1. Open an expense form
-    // 2. Create the expense
-    // 3. Update the bill with expense_id and status='paid'
-  }
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this bill?")) {
-      await deleteBill.mutateAsync(id)
-    }
-  }
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Loading bills...</p>
-      </div>
-    )
+    return <SkeletonTable />
   }
 
   return (
@@ -133,16 +124,6 @@ export function BillList({ onBillPaid }: BillListProps) {
             <option value="overdue">Overdue</option>
             <option value="paid">Paid</option>
           </select>
-          
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditingBill(undefined)
-              setIsFormOpen(true)
-            }}
-          >
-            Add Bill
-          </Button>
         </div>
       </div>
 
@@ -231,17 +212,14 @@ export function BillList({ onBillPaid }: BillListProps) {
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger>
                           <Button variant="ghost" size="sm">
                             <EllipsisVertical />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-auto p-3 space-y-2" align="end">
                           <DropdownMenuItem
-                            onClick={() => {
-                              setEditingBill(bill)
-                              setIsFormOpen(true)
-                            }}
+                            onClick={() => onEdit(bill)}
                           >
                             <Pencil className="size-4 mr-2" />
                             Edit Bill
@@ -256,9 +234,7 @@ export function BillList({ onBillPaid }: BillListProps) {
                               Mark as Paid
                             </DropdownMenuItem>
                           )}
-                          
                           <DropdownMenuSeparator />
-                          
                           <DropdownMenuItem
                             onClick={() => handleDelete(bill.id)}
                             className="text-red-600"
@@ -277,26 +253,30 @@ export function BillList({ onBillPaid }: BillListProps) {
         </Table>
       </div>
 
-      {/* Bill Form Sheet */}
-      <BillForm
-        initialData={editingBill}
-        open={isFormOpen}
-        setOpen={setIsFormOpen}
+    <ConfirmDialog
+      open={!!payingBill}
+      onOpenChange={(isOpen) => !isOpen && setPayingBill(null)}
+      title="Mark this bill as paid?"
+      description={
+        <>
+          This will record an expense of <span className="font-semibold text-foreground">{payingBill?.amount.toFixed(2)} ETB</span> for <span className="font-semibold text-foreground">{payingBill?.vendor_name}</span>.
+        </>
+      }
+      confirmText="Confirm Payment"
+      variant="success" // 👈 Makes the button green
+      isPending={markAsPaid.isPending}
+      onConfirm={handleConfirmPayment}
       />
 
     <ConfirmDialog
-    open={!!payingBill}
-    onOpenChange={(isOpen) => !isOpen && setPayingBill(null)}
-    title="Mark this bill as paid?"
-    description={
-      <>
-        This will record an expense of <span className="font-semibold text-foreground">{payingBill?.amount.toFixed(2)} ETB</span> for <span className="font-semibold text-foreground">{payingBill?.vendor_name}</span>.
-      </>
-    }
-    confirmText="Confirm Payment"
-    variant="success" // 👈 Makes the button green
-    isPending={markAsPaid.isPending}
-    onConfirm={handleConfirmPayment}
+      open={!!deletingBillId}
+      onOpenChange={(isOpen) => !isOpen && setDeletingBillId(null)}
+      title="Are you absolutely sure?"
+      description="This action cannot be undone. This will permanently delete this bill from your records."
+      confirmText="Delete Bill"
+      variant="destructive" // 👈 This makes the button red
+      isPending={deleteBill.isPending}
+      onConfirm={handleConfirmDelete}
     />
 
   </div>
