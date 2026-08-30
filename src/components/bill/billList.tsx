@@ -40,7 +40,6 @@ export function BillList({ onEdit }: BillListProps) {
     setDeletingBillId(id)
   }
 
-  // 👇 Add the actual delete confirmation handler
   const handleConfirmDelete = () => {
     if (!deletingBillId) return
     deleteBill.mutate(deletingBillId, {

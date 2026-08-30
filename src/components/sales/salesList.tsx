@@ -9,6 +9,7 @@ import { Trash2, CalendarDays } from 'lucide-react'
 import { useProducts } from '@/hooks/useProducts'
 import { useSalesByDateRange, useDeleteSalesByDate } from '@/hooks/useSales'
 import { SkeletonTable } from '../SkeletonLoader'
+import { ConfirmDialog } from '../ConfirmDialog'
 
 function formatETB(amount: number): string {
   return `${amount.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`
@@ -24,6 +25,11 @@ export function SalesList() {
   // 1. Default state is set to today
   const [startDate, setStartDate] = useState(getTodayString())
   const [endDate, setEndDate] = useState(getTodayString())
+
+  // Which date's delete is currently pending confirmation. null = dialog
+  // closed. Needed because, unlike the native confirm(), the dialog isn't
+  // inline/blocking — we need to remember which row triggered it.
+  const [pendingDeleteDate, setPendingDeleteDate] = useState<string | null>(null)
 
   // 2. Pass dates to the hook
   const { data: rawSales, isLoading: salesLoading } = useSalesByDateRange(startDate, endDate)
@@ -55,6 +61,13 @@ export function SalesList() {
 
     return { recent: recentArray }
   }, [rawSales, products])
+
+  const handleConfirmDelete = () => {
+    if (!pendingDeleteDate) return
+    deleteSales.mutate(pendingDeleteDate, {
+      onSuccess: () => setPendingDeleteDate(null),
+    })
+  }
 
   if (productsLoading || salesLoading) {
     return <SkeletonTable />
@@ -135,11 +148,7 @@ export function SalesList() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => {
-                        if (confirm(`Delete all sales entries for ${e.date}?`)) {
-                          deleteSales.mutate(e.date)
-                        }
-                      }}
+                      onClick={() => setPendingDeleteDate(e.date)}
                       disabled={deleteSales.isPending}
                     >
                       <Trash2 className="size-4 text-destructive" />
@@ -151,6 +160,18 @@ export function SalesList() {
           </Table>
         )}
       </CardContent>
+      <ConfirmDialog
+        open={pendingDeleteDate !== null}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setPendingDeleteDate(null)
+        }}
+        title="Are you absolutely sure?"
+        description={`This action cannot be undone. This will permanently delete all sales entries for ${pendingDeleteDate ?? ""} from your records.`}
+        confirmText="Delete Sales"
+        variant="destructive" // 👈 This makes the button red
+        isPending={deleteSales.isPending}
+        onConfirm={handleConfirmDelete}
+      />
     </Card>
   )
 }
