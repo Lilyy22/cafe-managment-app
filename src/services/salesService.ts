@@ -10,27 +10,18 @@ export const salesService = {
     total_amount: number
     note?: string
   }) => {
-    const { data, error } = await supabase
-      .from('sales')
-      .insert({
-        ...sale,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single()
-      
-    // 🔥 THIS LOG WILL TELL US IF THE SERVICE IS BEING CALLED TWICE
-    console.log('🔥🔥🔥 SALES SERVICE CREATE EXECUTING FOR:', sale.product_id, 'QTY:', sale.quantity)
-
-    await supabase
-      .rpc('record_sale_and_deduct_stock', {
-        p_date: sale.date,
-        p_product_id: sale.product_id,
-        p_quantity: sale.quantity,
-        p_total_amount: sale.total_amount,
-        p_note: sale.note || null
-      })
+    // record_sale_and_deduct_stock both inserts the sales row AND deducts
+    // inventory, atomically, in one Postgres transaction. A separate manual
+    // .insert() used to run right before this — that was writing every
+    // sale twice (once with no stock deduction, once with it), which was
+    // the entire cause of the duplicate-row bug. Only this call should run.
+    const { data, error } = await supabase.rpc('record_sale_and_deduct_stock', {
+      p_date: sale.date,
+      p_product_id: sale.product_id,
+      p_quantity: sale.quantity,
+      p_total_amount: sale.total_amount,
+      p_note: sale.note || null,
+    })
 
     if (error) throw new Error(error.message)
     return data as Sale

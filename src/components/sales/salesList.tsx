@@ -7,7 +7,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Trash2, CalendarDays } from 'lucide-react'
 import { useProducts } from '@/hooks/useProducts'
-import { useSalesByDateRange, useDeleteSale } from '@/hooks/useSales'
+import { useSalesByDateRange, useDeleteSalesByDate } from '@/hooks/useSales'
 import { SkeletonTable } from '../SkeletonLoader'
 
 function formatETB(amount: number): string {
@@ -19,7 +19,7 @@ const getTodayString = () => new Date().toISOString().split('T')[0]
 
 export function SalesList() {
   const { data: products, isLoading: productsLoading } = useProducts()
-  const deleteSales = useDeleteSale()
+  const deleteSales = useDeleteSalesByDate()
 
   // 1. Default state is set to today
   const [startDate, setStartDate] = useState(getTodayString())

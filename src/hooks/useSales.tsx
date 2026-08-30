@@ -51,18 +51,15 @@ export function useUpdateSale() {
     },
   })
 }
- 
-export function useDeleteSale() {
+
+export function useDeleteSalesByDate() {
   const queryClient = useQueryClient()
- 
   return useMutation({
-    mutationFn: (id: string) => salesService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['sales'] })
-    },
+    mutationFn: (date: string) => salesService.deleteByDate(date),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sales'] }),
     onError: (error) => {
-      console.error('Failed to delete sale:', error)
-      toast.error('Failed to delete sale. Check console for details.')
+      console.error('Failed to delete sales for date:', error)
+      toast.error('Failed to delete sales. Check console for details.')
     },
   })
 }

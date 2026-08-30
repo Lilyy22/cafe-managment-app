@@ -7,7 +7,7 @@ import { Input } from "../ui/input"
 import { Textarea } from "../ui/textarea"
 import { Button } from "../ui/button"
 import { Link } from "@tanstack/react-router"
-import { useCreateSale, useUpdateSale, useDeleteSale } from "@/hooks/useSales"
+import { useCreateSale, useUpdateSale, useDeleteSalesByDate } from "@/hooks/useSales"
 import { useProducts } from "@/hooks/useProducts"
 import { toast } from "sonner"
 import {
@@ -104,7 +104,7 @@ export function SalesForm({ initialData, open, setOpen }: SalesFormProps) {
 
   const createSale = useCreateSale()
   const updateSale = useUpdateSale()
-  const deleteSale = useDeleteSale()
+  const deleteSale = useDeleteSalesByDate()
 
   // (Re)populate rows once products load, and whenever the sheet opens for
   // a given date/edit target. Field array rows are keyed by product, so
