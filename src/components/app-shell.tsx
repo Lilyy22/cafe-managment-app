@@ -4,6 +4,7 @@ import {
   BellRing,
   ChevronLeft,
   Coffee,
+  HandCoins,
   LayoutDashboard,
   Menu,
   NotebookPen,
@@ -23,7 +24,8 @@ import { useInventories } from "@/hooks/useInventories";
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/daily", label: "Daily entry", icon: NotebookPen },
-  { to: "/ledger", label: "Sales & expenses", icon: Receipt },
+  { to: "/ledger", label: "Sales", icon: Receipt },
+  { to: "/expense", label: "Expenses", icon: HandCoins },
   { to: "/inventory", label: "Inventory", icon: Package },
   { to: "/products", label: "Products & prices", icon: Tags },
   { to: "/bill", label: "Bills", icon: BellRing },

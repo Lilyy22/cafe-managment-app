@@ -77,7 +77,7 @@ export function SalesList() {
     <Card>
       <CardHeader>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
+          <div className='mb-auto'>
             <CardTitle className="flex items-center gap-2">
               <CalendarDays className="size-5 text-primary" />
               Sales Report

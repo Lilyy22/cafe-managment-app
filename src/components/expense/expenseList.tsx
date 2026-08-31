@@ -69,41 +69,37 @@ export function ExpenseList() {
               {visibleExpenses.length} record{visibleExpenses.length !== 1 ? 's' : ''} · Total: {formatETB(totalAmount)}
             </CardDescription>
           </div>
-          {(filterCategory || filterDate) && (
-            <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear filters
-            </Button>
-          )}
+
+          {/* Filter Controls */}
+          <div className="flex gap-2">
+            <div className="space-y-1">
+              <Label htmlFor="filter-category" className="text-xs">Category</Label>
+              <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value ?? "all")}>
+                <SelectTrigger id="filter-category">
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  {categories?.map((c) => (
+                    <SelectItem key={c.name} value={c.name}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="filter-date" className="text-xs">Date</Label>
+              <Input
+                id="filter-date"
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Filter Controls */}
-        <div className="grid gap-3 sm:grid-cols-2 mt-4">
-          <div className="space-y-1">
-            <Label htmlFor="filter-category" className="text-xs">Filter by Category</Label>
-            <Select value={filterCategory} onValueChange={(value) => setFilterCategory(value ?? "all")}>
-              <SelectTrigger id="filter-category">
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                {categories?.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="filter-date" className="text-xs">Filter by Date</Label>
-            <Input
-              id="filter-date"
-              type="date"
-              value={filterDate}
-              onChange={(e) => setFilterDate(e.target.value)}
-            />
-          </div>
-        </div>
       </CardHeader>
 
       <CardContent className="max-h-[420px] overflow-auto">

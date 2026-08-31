@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BillRouteImport } from './routes/bill'
 import { Route as DailyRouteImport } from './routes/daily'
+import { Route as ExpenseRouteImport } from './routes/expense'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as ProductsRouteImport } from './routes/products'
@@ -30,6 +31,11 @@ const BillRoute = BillRouteImport.update({
 const DailyRoute = DailyRouteImport.update({
   id: '/daily',
   path: '/daily',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExpenseRoute = ExpenseRouteImport.update({
+  id: '/expense',
+  path: '/expense',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InventoryRoute = InventoryRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
+  '/expense': typeof ExpenseRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
+  '/expense': typeof ExpenseRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bill': typeof BillRoute
   '/daily': typeof DailyRoute
+  '/expense': typeof ExpenseRoute
   '/inventory': typeof InventoryRoute
   '/ledger': typeof LedgerRoute
   '/products': typeof ProductsRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/daily'
+    | '/expense'
     | '/inventory'
     | '/ledger'
     | '/products'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/daily'
+    | '/expense'
     | '/inventory'
     | '/ledger'
     | '/products'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bill'
     | '/daily'
+    | '/expense'
     | '/inventory'
     | '/ledger'
     | '/products'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BillRoute: typeof BillRoute
   DailyRoute: typeof DailyRoute
+  ExpenseRoute: typeof ExpenseRoute
   InventoryRoute: typeof InventoryRoute
   LedgerRoute: typeof LedgerRoute
   ProductsRoute: typeof ProductsRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/daily'
       fullPath: '/daily'
       preLoaderRoute: typeof DailyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/expense': {
+      id: '/expense'
+      path: '/expense'
+      fullPath: '/expense'
+      preLoaderRoute: typeof ExpenseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inventory': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BillRoute: BillRoute,
   DailyRoute: DailyRoute,
+  ExpenseRoute: ExpenseRoute,
   InventoryRoute: InventoryRoute,
   LedgerRoute: LedgerRoute,
   ProductsRoute: ProductsRoute,

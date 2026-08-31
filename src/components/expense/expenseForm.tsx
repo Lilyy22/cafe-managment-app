@@ -10,11 +10,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus } from 'lucide-react'
+import { HandCoins, Plus } from 'lucide-react'
 import { useCreateExpense, useExpenseDropdowns } from '@/hooks/useExpenses'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
-export function ExpenseForm() {
-  // 1. Local State
+interface ExpenseFormProps {
+  initialData?: any
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+export function ExpenseForm({ initialData, open, setOpen }: ExpenseFormProps) {
+  const isEditing = !!initialData
+
   const [eDate, setEDate] = useState(new Date().toISOString().split('T')[0])
   const [eCat, setECat] = useState('')
   const [eDuration, setEDuration] = useState('') // Added Duration State
@@ -50,19 +65,25 @@ export function ExpenseForm() {
     )
   }
 
+  const isBusy = isEditing
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Plus className="size-4 text-primary" /> Add expense
-        </CardTitle>
-        <CardDescription>Light bill, coal, salary or anything else</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={submitExpense} className="grid gap-3 sm:grid-cols-2">
+    <Sheet open={open} onOpenChange={(next) => !isBusy && setOpen(next)}>
+      <SheetContent side="right" className="w-full overflow-y-auto sm:min-w-lg">
+        <SheetHeader className="border-b">
+          <SheetTitle className="flex items-center gap-2">
+            <HandCoins className="size-5 text-primary" />
+            {isEditing ? "Edit item" : "Add expense"}
+          </SheetTitle>
+          <SheetDescription>
+            e.g. 500 ETB for sugar
+          </SheetDescription>
+        </SheetHeader>
+
+        <form id='EXPENSE_FORM_ID' onSubmit={submitExpense} className="space-y-4 px-4 grid gap-3 sm:grid-cols-2">
           
           {/* Date */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <Label htmlFor="edate">Date</Label>
             <Input
               id="edate"
@@ -74,7 +95,7 @@ export function ExpenseForm() {
           </div>
 
           {/* Amount */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <Label htmlFor="eamount">Amount (ETB)</Label>
             <Input
               id="eamount"
@@ -88,7 +109,7 @@ export function ExpenseForm() {
           </div>
 
           {/* Category (Fetched from Supabase) */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <Label>Category</Label>
             <Select 
               value={eCat} 
@@ -96,7 +117,7 @@ export function ExpenseForm() {
               required 
               disabled={dropdownsLoading}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={dropdownsLoading ? "Loading..." : "Select category"} />
               </SelectTrigger>
               <SelectContent>
@@ -110,7 +131,7 @@ export function ExpenseForm() {
           </div>
 
           {/* Duration (Fetched from Supabase) */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <Label>Duration</Label>
             <Select 
               value={eDuration} 
@@ -118,7 +139,7 @@ export function ExpenseForm() {
               required 
               disabled={dropdownsLoading}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={dropdownsLoading ? "Loading..." : "Select duration"} />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +154,7 @@ export function ExpenseForm() {
           </div>
 
           {/* Description */}
-          <div className="space-y-1 sm:col-span-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="edesc">Description (Optional)</Label>
             <Input
               id="edesc"
@@ -142,17 +163,23 @@ export function ExpenseForm() {
               placeholder="e.g., Paid for August electricity"
             />
           </div>
-
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="sm:col-span-2" 
-            disabled={createExpense.isPending || !eCat || !eDuration || !eAmount}
-          >
-            {createExpense.isPending ? 'Saving...' : 'Save expense'}
-          </Button>
         </form>
-      </CardContent>
-    </Card>
+    
+        {/* Submit Button */}
+        <SheetFooter>
+          <Button form="EXPENSE_FORM_ID" type="submit" disabled={isBusy}>
+            {isBusy ? "Saving..." : isEditing ? "Update Item" : "Add Expense"}
+          </Button>
+          <Button
+            variant="outline"
+            type="button"
+            disabled={isBusy}
+            onClick={() => reset(getDefaultValues(isEditing, initialData))}
+          >
+            Reset form
+          </Button>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }

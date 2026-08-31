@@ -1,16 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AppShell } from "../components/app-shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,19 +13,10 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs";
-import {
-  EXPENSE_CATEGORIES,
-  addDays,
-  cupsOf,
-  formatETB,
-  isoDate,
-  materialCostOf,
-  revenueOf,
-  useShop,
-  type ExpenseCategory,
-} from "../lib/shop-store";
-import { ExpenseForm } from "@/components/expense/expenseForm";
-import { ExpenseList } from "@/components/expense/expenseList";
+import { AlertTriangle } from "lucide-react";
+import { addDays, formatETB, isoDate } from "../lib/shop-store";
+import { useDailyLedger } from "@/hooks/useLedger";
+import { SkeletonTable } from "@/components/SkeletonLoader";
 
 export const Route = createFileRoute("/ledger")({
   head: () => ({
@@ -54,36 +38,23 @@ export const Route = createFileRoute("/ledger")({
 });
 
 function LedgerPage() {
-  const { entries, expenses, products, materialStats } = useShop();
   const [range, setRange] = useState<"7" | "30" | "90">("30");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<"all" | ExpenseCategory>("all");
 
   const start = from || addDays(new Date(), -Number(range) + 1);
   const end = to || isoDate(new Date());
 
-  const daysInRange = useMemo(() => {
-    return entries
-      .filter((e) => e.date >= start && e.date <= end)
-      .sort((a, b) => (a.date < b.date ? 1 : -1))
-      .map((e) => {
-        const sales = revenueOf(e, products);
-        const matCost = materialCostOf(e, materialStats, products);
-        const other = expenses
-          .filter((x) => x.date === e.date)
-          .reduce((s, x) => s + x.amount, 0);
-        return { entry: e, sales, matCost, other, profit: sales - matCost - other };
-      });
-  }, [entries, expenses, products, materialStats, start, end]);
+  // One row per day, computed in the database (get_daily_ledger), instead
+  // of fetching every raw sale/expense row and reducing over them here.
+  const { data: daysInRange = [], isLoading } = useDailyLedger(start, end);
 
   const totals = daysInRange.reduce(
     (acc, d) => ({
       sales: acc.sales + d.sales,
-      cost: acc.cost + d.matCost + d.other,
+      cost: acc.cost + d.material_cost + d.other_cost,
       profit: acc.profit + d.profit,
-      cups: acc.cups + cupsOf(d.entry),
+      cups: acc.cups + d.units,
     }),
     { sales: 0, cost: 0, profit: 0, cups: 0 },
   );
@@ -93,8 +64,33 @@ function LedgerPage() {
       title="Sales & expenses"
       description="Filter any period and see exactly what came in and what went out."
     >
-      <Card>
-        <CardContent className="flex flex-col gap-3 p-4 lg:flex-row lg:items-end">
+
+      {/* Summary cards */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: "Cups & plates sold", value: totals.cups.toLocaleString() },
+          { label: "Sales", value: formatETB(totals.sales) },
+          { label: "Total cost", value: formatETB(totals.cost) },
+          { label: "Profit", value: formatETB(totals.profit) },
+        ].map((s) => (
+          <Card key={s.label}>
+            <CardContent>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</p>
+              <p className="mt-2 text-2xl font-bold text-foreground">{s.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Daily sales table — InventoryList-style: plain bordered div + Table,
+          no extra Card nesting around the table itself, explicit empty state. */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="mb-1">Daily sales</CardTitle>
+          <CardDescription className="mb-4">
+            {start} → {end}
+          </CardDescription>
+          <div className="flex flex-col gap-3 mb-4 lg:flex-row lg:items-end">
           <div className="space-y-1">
             <Label className="text-xs">Quick range</Label>
             <Tabs
@@ -112,73 +108,29 @@ function LedgerPage() {
               </TabsList>
             </Tabs>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="from" className="text-xs">
-              From
-            </Label>
-            <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            <div className="space-y-1">
+              <Label htmlFor="from" className="text-xs">
+                From
+              </Label>
+              <Input id="from" type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="to" className="text-xs">
+                To
+              </Label>
+              <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+            </div>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="to" className="text-xs">
-              To
-            </Label>
-            <Input id="to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+        </CardHeader>
+        {isLoading ? (
+          <SkeletonTable />
+        ) : daysInRange.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground">
+            <AlertTriangle className="mx-auto h-12 w-12 mb-2 opacity-20" />
+            <p>No sales found for this date range.</p>
           </div>
-          <div className="flex-1 space-y-1">
-            <Label htmlFor="search" className="text-xs">
-              Search expenses
-            </Label>
-            <Input
-              id="search"
-              placeholder="coffee, rent, light…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label className="text-xs">Category</Label>
-            <Select value={category} onValueChange={(v) => setCategory(v as typeof category)}>
-              <SelectTrigger className="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                {EXPENSE_CATEGORIES.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "Cups & plates sold", value: totals.cups.toLocaleString() },
-          { label: "Sales", value: formatETB(totals.sales) },
-          { label: "Total cost", value: formatETB(totals.cost) },
-          { label: "Profit", value: formatETB(totals.profit) },
-        ].map((s) => (
-          <Card key={s.label}>
-            <CardContent className="p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</p>
-              <p className="mt-2 text-2xl font-bold text-foreground">{s.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily sales</CardTitle>
-            <CardDescription>
-              {start} → {end}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="max-h-[520px] overflow-auto">
+        ) : (
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -191,12 +143,12 @@ function LedgerPage() {
               </TableHeader>
               <TableBody>
                 {daysInRange.map((d) => (
-                  <TableRow key={d.entry.id}>
-                    <TableCell className="font-medium">{d.entry.date}</TableCell>
-                    <TableCell className="text-right">{cupsOf(d.entry)}</TableCell>
+                  <TableRow key={d.date}>
+                    <TableCell className="font-medium">{d.date}</TableCell>
+                    <TableCell className="text-right">{d.units}</TableCell>
                     <TableCell className="text-right">{formatETB(d.sales)}</TableCell>
                     <TableCell className="text-right text-muted-foreground">
-                      {formatETB(d.matCost + d.other)}
+                      {formatETB(d.material_cost + d.other_cost)}
                     </TableCell>
                     <TableCell
                       className={`text-right font-semibold ${d.profit >= 0 ? "text-success" : "text-destructive"}`}
@@ -207,14 +159,9 @@ function LedgerPage() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <ExpenseForm />
-          <ExpenseList />
-        </div>
-      </div>
+          </div>
+        )}
+      </Card>
     </AppShell>
   );
 }

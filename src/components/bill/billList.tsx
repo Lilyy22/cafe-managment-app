@@ -21,6 +21,7 @@ import { useBills, useDeleteBill, useMarkBillAsPaid } from "@/hooks/useBills"
 import type { Bill } from "@/types/database"
 import { ConfirmDialog } from "../ConfirmDialog"
 import { SkeletonTable } from "../SkeletonLoader"
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 
 interface BillListProps{
   onEdit: (item: any) => void
@@ -105,27 +106,6 @@ export function BillList({ onEdit }: BillListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Header with Filter */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <FileText className="size-5 text-primary" />
-          <h2 className="text-lg font-semibold">Bills & Payables</h2>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
-            className="text-sm border rounded-md px-3 py-1.5 bg-background"
-          >
-            <option value="all">All Bills</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="overdue">Overdue</option>
-            <option value="paid">Paid</option>
-          </select>
-        </div>
-      </div>
-
       {/* Stats Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="rounded-lg border bg-card p-3">
@@ -149,108 +129,123 @@ export function BillList({ onEdit }: BillListProps) {
       </div>
 
       {/* Bills Table */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Vendor</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Due Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-right"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredBills?.length === 0 ? (
+      <Card className="rounded-md border">
+        <CardHeader className="flex justify-between gap-2">
+          <CardTitle>Bills List</CardTitle>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as any)}
+            className="text-sm border rounded-md px-3 py-1.5 bg-background justify-end"
+          >
+            <option value="all">All Bills</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="overdue">Overdue</option>
+            <option value="paid">Paid</option>
+          </select>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  {filter === "all" 
-                    ? "No bills found. Add your first bill above." 
-                    : `No ${filter} bills.`}
-                </TableCell>
+                <TableHead>Vendor</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Due Date</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right"></TableHead>
               </TableRow>
-            ) : (
-              filteredBills?.map((bill) => {
-                const overdue = isOverdue(bill)
-                return (
-                  <TableRow 
-                    key={bill.id}
-                    className={overdue && bill.status !== "paid" ? "bg-red-50/50" : ""}
-                  >
-                    <TableCell className="font-medium">
-                      <div>
-                        <p>{bill.vendor_name}</p>
-                        {bill.description && (
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">
-                            {bill.description}
+            </TableHeader>
+            <TableBody>
+              {filteredBills?.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    {filter === "all" 
+                      ? "No bills found. Add your first bill above." 
+                      : `No ${filter} bills.`}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredBills?.map((bill) => {
+                  const overdue = isOverdue(bill)
+                  return (
+                    <TableRow 
+                      key={bill.id}
+                      className={overdue && bill.status !== "paid" ? "bg-red-50/50" : ""}
+                    >
+                      <TableCell className="font-medium">
+                        <div>
+                          <p>{bill.vendor_name}</p>
+                          {bill.description && (
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                              {bill.description}
+                            </p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {bill.category || "Uncategorized"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className={overdue && bill.status !== "paid" ? "text-red-600 font-medium" : ""}>
+                        
+                        </div>
+                        {overdue && bill.status !== "paid" && (
+                          <p className="text-xs text-red-600">
+                            {Math.ceil((new Date().getTime() - new Date(bill.due_date).getTime()) / (1000 * 60 * 60 * 24))} days overdue
                           </p>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">
-                        {bill.category || "Uncategorized"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className={overdue && bill.status !== "paid" ? "text-red-600 font-medium" : ""}>
-                       
-                      </div>
-                      {overdue && bill.status !== "paid" && (
-                        <p className="text-xs text-red-600">
-                          {Math.ceil((new Date().getTime() - new Date(bill.due_date).getTime()) / (1000 * 60 * 60 * 24))} days overdue
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {bill.amount.toFixed(2)} ETB
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getStatusBadge(bill)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <Button variant="ghost" size="sm">
-                            <EllipsisVertical />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-auto p-3 space-y-2" align="end">
-                          <DropdownMenuItem
-                            onClick={() => onEdit(bill)}
-                          >
-                            <Pencil className="size-4 mr-2" />
-                            Edit Bill
-                          </DropdownMenuItem>
-                          
-                          {bill.status !== "paid" && (
+                      </TableCell>
+                      <TableCell className="text-right font-medium">
+                        {bill.amount.toFixed(2)} ETB
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {getStatusBadge(bill)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger>
+                            <Button variant="ghost" size="sm">
+                              <EllipsisVertical />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-auto p-3 space-y-2" align="end">
                             <DropdownMenuItem
-                              onClick={() => setPayingBill(bill)}
-                              className="text-green-600"
+                              onClick={() => onEdit(bill)}
                             >
-                              <CheckCircle2 className="size-4 mr-2" />
-                              Mark as Paid
+                              <Pencil className="size-4 mr-2" />
+                              Edit Bill
                             </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(bill.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="size-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                            
+                            {bill.status !== "paid" && (
+                              <DropdownMenuItem
+                                onClick={() => setPayingBill(bill)}
+                                className="text-green-600"
+                              >
+                                <CheckCircle2 className="size-4 mr-2" />
+                                Mark as Paid
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(bill.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="size-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
     <ConfirmDialog
       open={!!payingBill}
@@ -277,7 +272,6 @@ export function BillList({ onEdit }: BillListProps) {
       isPending={deleteBill.isPending}
       onConfirm={handleConfirmDelete}
     />
-
   </div>
   )
 }
