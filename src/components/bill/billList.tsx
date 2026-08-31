@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { FileText, Pencil, CheckCircle2, Trash2, AlertCircle, EllipsisVertical } from "lucide-react"
+import { Pencil, CheckCircle2, Trash2, AlertCircle, EllipsisVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Table,

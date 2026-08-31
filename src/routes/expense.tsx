@@ -3,8 +3,8 @@ import { useState } from "react";
 import { AppShell } from "../components/app-shell";
 import { ExpenseForm } from "@/components/expense/expenseForm";
 import { ExpenseList } from "@/components/expense/expenseList";
-import { Button } from "@base-ui/react";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/expense")({
   head: () => ({
@@ -29,10 +29,10 @@ function ExpensePage() {
     const [open, setOpen] = useState(false)
     const [editingItem, setEditingItem] = useState<any>(null)
   
-    const handleEdit = (item: any) => {
-      setEditingItem(item) // Pass the specific item's data
-      setOpen(true)
-    }
+    // const handleEdit = (item: any) => {
+    //   setEditingItem(item) // Pass the specific item's data
+    //   setOpen(true)
+    // }
     const handleNew = () => {
       setOpen(true)
       setEditingItem(null)

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Card, CardTitle, CardHeader, CardDescription, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -10,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { HandCoins, Plus } from 'lucide-react'
+import { HandCoins } from 'lucide-react'
 import { useCreateExpense, useExpenseDropdowns } from '@/hooks/useExpenses'
 import {
   Sheet,
@@ -172,9 +171,9 @@ export function ExpenseForm({ initialData, open, setOpen }: ExpenseFormProps) {
           </Button>
           <Button
             variant="outline"
-            type="button"
+            type="reset"
             disabled={isBusy}
-            onClick={() => reset(getDefaultValues(isEditing, initialData))}
+            // onClick={() => reset(getDefaultValues(isEditing, initialData))}
           >
             Reset form
           </Button>

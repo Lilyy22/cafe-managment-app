@@ -40,12 +40,6 @@ export function ExpenseList() {
     return visibleExpenses.reduce((sum, exp) => sum + (exp.amount || 0), 0)
   }, [visibleExpenses])
 
-  // 5. Clear Filters
-  const clearFilters = () => {
-    setFilterCategory('')
-    setFilterDate('')
-  }
-
   if (isLoading) {
     return (
       <Card>
