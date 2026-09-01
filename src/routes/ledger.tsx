@@ -122,6 +122,7 @@ function LedgerPage() {
             </div>
           </div>
         </CardHeader>
+        <CardContent>
         {isLoading ? (
           <SkeletonTable />
         ) : daysInRange.length === 0 ? (
@@ -161,6 +162,7 @@ function LedgerPage() {
             </Table>
           </div>
         )}
+        </CardContent>
       </Card>
     </AppShell>
   );
