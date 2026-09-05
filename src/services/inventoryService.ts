@@ -74,6 +74,28 @@ export const inventoryService = {
     return data as Inventory
   },
 
+  restock: async ({
+    inventoryId,
+    quantityAdded,
+    totalCost,
+    note
+  }: {
+    inventoryId: string
+    quantityAdded: number
+    totalCost: number
+    note?: string
+  }) => {
+    const { data, error } = await supabase.rpc('record_inventory_restock', {
+      p_inventory_id: inventoryId,
+      p_quantity_added: quantityAdded,
+      p_total_cost: totalCost,
+      p_note: note || null,
+    })
+
+    if (error) throw new Error(error.message)
+    return data
+  },
+  
   delete: async (id: string) => {
     const { error } = await supabase.from('inventories').delete().eq('id', id)
     if (error) throw new Error(error.message)

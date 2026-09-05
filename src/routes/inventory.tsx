@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "../components/app-shell";
-import { InventoryForm } from "@/components/inventory/inventoryForm";
+import { InventoryForm, type InventoryRecord } from "@/components/inventory/inventoryForm";
 import { InventoryList } from "@/components/inventory/inventoryList";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RestockForm } from "@/components/inventory/restockForm";
 
 export const Route = createFileRoute("/inventory")({
   head: () => ({
@@ -26,17 +27,28 @@ export const Route = createFileRoute("/inventory")({
 });
 
 function InventoryPage() {
-  const [open, setOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<any>(null)
+  const [open, setOpen] = useState(false);
+  const [openRestock, setOpenRestock] = useState(false);
+  
+  // ✅ Use proper types instead of 'any'
+  const [editingItem, setEditingItem] = useState<InventoryRecord | undefined>(undefined);
+  const [restockingItem, setRestockingItem] = useState<InventoryRecord | null>(null);
 
-  const handleEdit = (item: any) => {
-    setEditingItem(item) // Pass the specific item's data
-    setOpen(true)
-  }
+  const handleEdit = (item: InventoryRecord) => {
+    setEditingItem(item);
+    setOpen(true);
+  };
+
   const handleNew = () => {
-    setOpen(true)
-    setEditingItem(null)
-  }
+    setEditingItem(undefined);
+    setOpen(true);
+  };
+
+  // ✅ Update to accept the specific item being restocked
+  const handleRestock = (item: InventoryRecord) => {
+    setRestockingItem(item);
+    setOpenRestock(true);
+  };
 
   return (
     <AppShell
@@ -49,13 +61,23 @@ function InventoryPage() {
         </Button>
       }
     >
-       <InventoryForm 
+      <InventoryForm 
         open={open} 
         setOpen={setOpen}
         initialData={editingItem} 
       />
+      
+      {/* ✅ Pass the onRestock handler down to the list */}
       <InventoryList 
         onEdit={handleEdit}
+        onRestock={handleRestock}
+      />
+      
+      {/* ✅ Fix prop name: setOpenRestock instead of setOpen */}
+      <RestockForm 
+        open={openRestock} 
+        setOpenRestock={setOpenRestock} 
+        item={restockingItem} 
       />
     </AppShell>
   );

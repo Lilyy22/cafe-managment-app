@@ -8,6 +8,11 @@ export interface Database {
           Insert: { id?: string; name: string; symbol?: string };
           Update: { id?: string; name?: string; symbol?: string };
         };
+        InventoryRestock: {
+          Row: { id: string; inventory_id: string; quantity_added: number; total_cost: number; unit_cost: string; note: string;};
+          Insert: { id?: string; inventory_id: string; quantity_added: number; total_cost: number; unit_cost: string; note?: string;};
+          Update: { id?: string; inventory_id: string; quantity_added: number; total_cost: number; unit_cost: string; note?: string;};
+        };
         durations: {
           Row: { id: string; name: string; days?: number };
           Insert: { id?: string; name: string; days?: number };
@@ -83,6 +88,15 @@ export interface Database {
     };
   }
 
+export interface InventoryRestock {
+  id: string;
+  inventory_id: string;
+  quantity_added: number;
+  total_cost: number;
+  unit_cost: number;
+  note: string | null;
+  created_at: string;
+}
 
 export interface Duration {
     name: string; // e.g., "daily", "weekly", "monthly"

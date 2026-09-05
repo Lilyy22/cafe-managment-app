@@ -8,13 +8,14 @@ import {
 } from '../ui/table'
 import { Badge } from '../ui/badge'
 import { Button } from '../ui/button'
-import { Pencil, AlertTriangle } from 'lucide-react'
+import { Pencil, AlertTriangle, PlusCircle } from 'lucide-react'
 import { useInventories } from '@/hooks/useInventories'
 import { SkeletonTable } from '../SkeletonLoader'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 
 interface InventoryListProps {
   onEdit: (item: any) => void
+  onRestock: (item: any) => void
 }
 
 // Helper to format ETB currency
@@ -22,7 +23,7 @@ function formatETB(amount: number): string {
   return `${amount.toLocaleString('en-ET', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ETB`
 }
 
-export function InventoryList({ onEdit }: InventoryListProps) {
+export function InventoryList({ onEdit, onRestock }: InventoryListProps) {
   const { data: inventories, isLoading } = useInventories()
 
   if (isLoading) {
@@ -107,6 +108,15 @@ export function InventoryList({ onEdit }: InventoryListProps) {
                       onClick={() => onEdit(item)}
                     >
                       <Pencil className="size-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      onClick={() => onRestock(item)}
+                    >
+                      <PlusCircle className="size-4 mr-1" />
+                      Restock
                     </Button>
                   </TableCell>
                 </TableRow>

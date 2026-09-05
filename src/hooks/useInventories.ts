@@ -60,13 +60,31 @@ export function useUpdateInventory() {
 }
 
 export function useDeleteInventory() {
-    const queryClient = useQueryClient()
-    return useMutation({
-      mutationFn: inventoryService.delete,
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['inventories'] })
-        toast.success('Inventory item deleted!')
-      },
-      onError: (error) => toast.error(`Failed to delete: ${error.message}`)
-    })
-  }
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: inventoryService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventories'] })
+      toast.success('Inventory item deleted!')
+    },
+    onError: (error) => toast.error(`Failed to delete: ${error.message}`)
+  })
+}
+
+export function useRestockInventory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: inventoryService.restock, // Calls the service method directly
+    onSuccess: () => {
+      // Invalidate both because the RPC updates inventory AND creates an expense
+      queryClient.invalidateQueries({ queryKey: ['inventories'] })
+      queryClient.invalidateQueries({ queryKey: ['expenses'] })
+      toast.success('Stock updated and expense recorded!')
+    },
+    onError: (error: Error) => {
+      console.error('Restock failed:', error)
+      toast.error(`Failed to restock: ${error.message}`)
+    }
+  })
+}
